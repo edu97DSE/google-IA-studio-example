@@ -1,0 +1,87 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    // Collection: /users/{userId}/gym_sessions/{sessionId}
+    // Fields:
+    //   - date: string (ISO 8601 date)
+    //   - workoutType: string (optional)
+    //   - createdAt: string (ISO 8601 date-time)
+    //
+    // Collection: /users/{userId}/weight_entries/{entryId}
+    // Fields:
+    //   - date: string (ISO 8601 date)
+    //   - weight: number
+    //   - createdAt: string (ISO 8601 date-time)
+    //
+    // Collection: /users/{userId}/measurement_entries/{entryId}
+    // Fields:
+    //   - date: string (ISO 8601 date)
+    //   - chest: number (optional)
+    //   - waist: number (optional)
+    //   - hips: number (optional)
+    //   - biceps: number (optional)
+    //   - thighs: number (optional)
+    //   - createdAt: string (ISO 8601 date-time)
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidDate(dateStr) {
+      return dateStr is string && dateStr.matches("^\\d{4}-\\d{2}-\\d{2}$");
+    }
+
+    function isValidDateTime(dateTimeStr) {
+      return dateTimeStr is string && dateTimeStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*Z?$");
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      
+      match /gym_sessions/{sessionId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && 
+          request.resource.data.keys().hasAll(['date', 'createdAt']) &&
+          isValidDate(request.resource.data.date) &&
+          isValidDateTime(request.resource.data.createdAt);
+        allow update: if isOwner(userId) && 
+          request.resource.data.date == resource.data.date &&
+          isValidDateTime(request.resource.data.createdAt);
+        allow delete: if isOwner(userId);
+      }
+
+      match /weight_entries/{entryId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && 
+          request.resource.data.keys().hasAll(['date', 'weight', 'createdAt']) &&
+          request.resource.data.weight is number &&
+          isValidDate(request.resource.data.date) &&
+          isValidDateTime(request.resource.data.createdAt);
+        allow update: if isOwner(userId) && 
+          request.resource.data.date == resource.data.date &&
+          request.resource.data.weight is number;
+        allow delete: if isOwner(userId);
+      }
+
+      match /measurement_entries/{entryId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && 
+          request.resource.data.keys().hasAll(['date', 'createdAt']) &&
+          isValidDate(request.resource.data.date) &&
+          isValidDateTime(request.resource.data.createdAt);
+        allow update: if isOwner(userId) && 
+          request.resource.data.date == resource.data.date;
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}

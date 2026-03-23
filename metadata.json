@@ -1,0 +1,5 @@
+{
+  "name": "Gym Progress Tracker",
+  "description": "Track your gym attendance, weight, and body measurements with an interactive calendar and progress charts.",
+  "requestFramePermissions": []
+}

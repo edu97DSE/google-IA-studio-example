@@ -1,0 +1,85 @@
+{
+  "entities": {
+    "GymSession": {
+      "title": "Gym Session",
+      "description": "A record of a gym visit.",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "The date of the gym session (ISO 8601)."
+        },
+        "workoutType": {
+          "type": "string",
+          "description": "Optional description of the workout (e.g., 'Legs', 'Push')."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the record was created."
+        }
+      },
+      "required": ["date", "createdAt"]
+    },
+    "WeightEntry": {
+      "title": "Weight Entry",
+      "description": "A record of body weight.",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "The date of the measurement."
+        },
+        "weight": {
+          "type": "number",
+          "description": "Body weight in kg or lbs."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the record was created."
+        }
+      },
+      "required": ["date", "weight", "createdAt"]
+    },
+    "MeasurementEntry": {
+      "title": "Measurement Entry",
+      "description": "A record of body measurements.",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "format": "date",
+          "description": "The date of the measurements."
+        },
+        "chest": { "type": "number" },
+        "waist": { "type": "number" },
+        "hips": { "type": "number" },
+        "biceps": { "type": "number" },
+        "thighs": { "type": "number" },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "When the record was created."
+        }
+      },
+      "required": ["date", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/gym_sessions/{sessionId}": {
+      "schema": "GymSession",
+      "description": "Collection of gym visits for a user."
+    },
+    "/users/{userId}/weight_entries/{entryId}": {
+      "schema": "WeightEntry",
+      "description": "Collection of weight tracking entries for a user."
+    },
+    "/users/{userId}/measurement_entries/{entryId}": {
+      "schema": "MeasurementEntry",
+      "description": "Collection of body measurement entries for a user."
+    }
+  }
+}
